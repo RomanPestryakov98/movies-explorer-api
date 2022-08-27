@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const { errors, celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -15,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect('mongodb://127.0.0.1/bitfilmsdb', {
   useNewUrlParser: true,
 });
-
+app.use(cookieParser());
 app.use(requestLogger);
 
 app.post('/signin', celebrate({
@@ -33,6 +34,8 @@ app.post('/signup', celebrate({
 }), require('./controllers/users').createUser);
 
 app.use(auth);
+app.get('/signout', require('./controllers/users').signout);
+
 app.use('/users', require('./routes/users'));
 app.use('/movies', require('./routes/movies'));
 
