@@ -1,13 +1,17 @@
 require('dotenv').config();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const InternalServerError = require('../errors/InternalServerError');
 const NotFound = require('../errors/NotFound');
 const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
+const InternalServerError = require('../errors/InternalServerError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
+
+module.exports.signout = (req, res) => {
+  res.clearCookie('jwt', { httpOnly: true, sameSite: true }).send({ message: 'Signed Out' });
+};
 
 module.exports.login = (req, res, next) => {
   const {
@@ -22,13 +26,9 @@ module.exports.login = (req, res, next) => {
         sameSite: true,
         maxAge: (3600 * 24 * 7),
       });
-      res.send('ok');
+      res.send({ message: 'ok' });
     })
     .catch(next);
-};
-
-module.exports.signout = (req, res) => {
-  res.clearCookie('jwt', { httpOnly: true, sameSite: true }).send({ message: 'Signed Out' });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -59,8 +59,7 @@ module.exports.infoUser = (req, res, next) => {
   User.findById(_id)
     .then((user) => {
       if (!user) {
-        const errNotFound = new NotFound('Пользователь не существует');
-        throw errNotFound;
+        throw new NotFound('Пользователь не существует');
       }
       return res.send(user);
     })
@@ -80,20 +79,19 @@ module.exports.updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        const errNotFound = new NotFound('Некорректный id пользователя');
-        throw errNotFound;
+        throw new NotFound('Некорректный id пользователя');
       }
       return res.send(user);
     })
     .catch((err) => {
+      if (err.code === 11000) {
+        next(new Conflict('Такой email уже существует'));
+        return;
+      }
       if (err.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные'));
         return;
       }
-      if (err.name === 'NotFound') {
-        next(err);
-        return;
-      }
-      next(new InternalServerError());
+      next(err);
     });
 };

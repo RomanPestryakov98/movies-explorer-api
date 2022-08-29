@@ -1,5 +1,4 @@
 const Movie = require('../models/movie');
-const InternalServerError = require('../errors/InternalServerError');
 const NotFound = require('../errors/NotFound');
 const BadRequest = require('../errors/BadRequest');
 const Forbidden = require('../errors/Forbidden');
@@ -24,7 +23,7 @@ module.exports.createMovie = (req, res, next) => {
         next(new BadRequest('Переданы некорректные данные'));
         return;
       }
-      next(new InternalServerError());
+      next(err);
     });
 };
 
@@ -32,29 +31,19 @@ module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params._id)
     .then((movie) => {
       if (!movie) {
-        const errNotFound = new NotFound('Фильма не существует');
-        throw errNotFound;
+        throw new NotFound('Фильма не существует');
       }
       if (movie.owner.toString() !== req.user._id) {
-        const errForbidden = new Forbidden('Нет прав на удаление фильма');
-        throw errForbidden;
+        throw new Forbidden('Нет прав на удаление фильма');
       }
       return Movie.findByIdAndRemove(req.params._id)
         .then((movieDelete) => res.send(movieDelete));
     })
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        next(err);
-        return;
-      }
       if (err.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные'));
         return;
       }
-      if (err.name === 'Forbidden') {
-        next(err);
-        return;
-      }
-      next(new InternalServerError());
+      next(err);
     });
 };
