@@ -9,10 +9,13 @@ const {
 
 const urlReg = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.,~#?&//=!]*$)/;
 
+const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+
 module.exports = {
   dataMovies,
   PORT,
   NODE_ENV,
   JWT_SECRET,
   urlReg,
+  DEFAULT_ALLOWED_METHODS,
 };
