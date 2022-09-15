@@ -25,6 +25,7 @@ module.exports.login = (req, res, next) => {
         maxAge: (3600 * 24 * 7),
         httpOnly: true,
         sameSite: 'none',
+        secure: true,
       });
       res.send({ message: 'ok' });
     })
