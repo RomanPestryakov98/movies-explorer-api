@@ -26,8 +26,8 @@ module.exports.login = (req, res, next) => {
         httpOnly: true,
         sameSite: 'none',
         secure: true,
-      });
-      res.send({ message: 'ok' });
+      })
+        .send({ message: 'ok' });
     })
     .catch(next);
 };
