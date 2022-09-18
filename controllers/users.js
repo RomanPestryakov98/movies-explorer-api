@@ -10,7 +10,7 @@ const InternalServerError = require('../errors/InternalServerError');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.signout = (req, res) => {
-  res.clearCookie('jwt', { httpOnly: true, sameSite: true }).send({ message: 'Signed Out' });
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true }).send({ message: 'Signed Out' });
 };
 
 module.exports.login = (req, res, next) => {
